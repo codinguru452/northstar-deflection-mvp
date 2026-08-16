@@ -15,12 +15,15 @@ from mysql.connector import Error
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# MySQL configuration.
+# Railway provides MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, and
+# MYSQLDATABASE. The MYSQL_* fallbacks keep the same code working locally.
 DB_CONFIG = {
-    "host": os.getenv("MYSQL_HOST", "127.0.0.1"),
-    "port": int(os.getenv("MYSQL_PORT", "3306")),
-    "user": os.getenv("MYSQL_USER", "root"),
-    "password": os.getenv("MYSQL_PASSWORD", ""),
-    "database": os.getenv("MYSQL_DATABASE", "northstar_db"),
+    "host": os.getenv("MYSQLHOST", os.getenv("MYSQL_HOST", "127.0.0.1")),
+    "port": int(os.getenv("MYSQLPORT", os.getenv("MYSQL_PORT", "3306"))),
+    "user": os.getenv("MYSQLUSER", os.getenv("MYSQL_USER", "root")),
+    "password": os.getenv("MYSQLPASSWORD", os.getenv("MYSQL_PASSWORD", "")),
+    "database": os.getenv("MYSQLDATABASE", os.getenv("MYSQL_DATABASE", "northstar_db")),
 }
 
 SESSION_DAYS = 7
@@ -985,8 +988,16 @@ class APIHandler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     os.chdir(BASE_DIR)
-    server = ThreadingHTTPServer(("127.0.0.1", 8000), APIHandler)
-    print("Northstar is running at http://127.0.0.1:8000")
+
+    # Railway supplies PORT automatically. Binding to 0.0.0.0 makes the
+    # application reachable through Railway's public domain. Locally, the
+    # fallback remains port 8000.
+    host = "0.0.0.0"
+    port = int(os.getenv("PORT", "8000"))
+
+    server = ThreadingHTTPServer((host, port), APIHandler)
+    print(f"Northstar is running on {host}:{port}")
     print("Press Ctrl+C to stop the server.")
+
     threading.Thread(target=tracking_worker, daemon=True).start()
     server.serve_forever()
