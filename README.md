@@ -7,7 +7,7 @@ Stack
 - Vanilla JavaScript
 - Python 3.10+
 - MySQL 8
-- Python standard-library HTTP server (no Flask, Django, FastAPI, Node.js, or Express)
+- Python standard
 
 key functionality
 
